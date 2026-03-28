@@ -2,10 +2,13 @@ import { useEffect } from 'react';
 import { motion, useAnimation, useMotionValue, useTransform } from 'framer-motion';
 import { useDrag } from '@use-gesture/react';
 import type { MathProblem } from '../logic/mathGenerator';
+import type { WordProblem } from '../logic/wordGenerator';
+
+export type GameProblem = MathProblem | WordProblem;
 
 interface Props {
-  problem: MathProblem;
-  onAnswer: (answer: number) => void;
+  problem: GameProblem;
+  onAnswer: (answer: number | string) => void;
 }
 
 export function SwipeCard({ problem, onAnswer }: Props) {
@@ -64,8 +67,9 @@ export function SwipeCard({ problem, onAnswer }: Props) {
         targetX = mx;
       }
 
-      const answer = problem.options[answeredIndex];
-      const isCorrect = answer === problem.answer;
+      const option = problem.options[answeredIndex];
+      const answerVal = typeof option === 'object' && option !== null && 'id' in option ? option.id : option;
+      const isCorrect = answerVal === problem.answer;
 
       if (isCorrect) {
         const velocityScale = Math.max(vx, vy);
@@ -81,10 +85,10 @@ export function SwipeCard({ problem, onAnswer }: Props) {
         }).then(() => {
           x.set(0);
           y.set(1200); 
-          onAnswer(answer);
+          onAnswer(answerVal as string | number);
         });
       } else {
-        onAnswer(answer);
+        onAnswer(answerVal as string | number);
         backgroundColor.set('rgba(150, 0, 0, 0.5)'); 
         controls.start({
           x: [targetX * 0.1, -25, 25, -20, 20, 0],
@@ -108,15 +112,29 @@ export function SwipeCard({ problem, onAnswer }: Props) {
       <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
       
       <div className="flex flex-col items-center justify-center gap-6 relative z-10 w-full h-full p-8 pointer-events-none">
-        <div className="text-[140px] md:text-[180px] leading-none font-black text-white tracking-tighter [text-shadow:0_4px_20px_rgba(255,255,255,0.3)] will-change-transform">
-          {problem.num1}
-        </div>
-        <div className="text-6xl md:text-7xl font-bold text-gray-500">
-          {problem.operator}
-        </div>
-        <div className="text-[140px] md:text-[180px] leading-none font-black text-white tracking-tighter [text-shadow:0_4px_20px_rgba(255,255,255,0.3)] will-change-transform">
-          {problem.num2}
-        </div>
+        {problem.type === 'math' ? (
+          <>
+            <div className="text-8xl md:text-[160px] leading-none font-black text-white tracking-tighter [text-shadow:0_4px_20px_rgba(255,255,255,0.3)] will-change-transform">
+              {problem.num1}
+            </div>
+            <div className="text-5xl md:text-7xl font-bold text-gray-500">
+              {problem.operator}
+            </div>
+            <div className="text-8xl md:text-[160px] leading-none font-black text-white tracking-tighter [text-shadow:0_4px_20px_rgba(255,255,255,0.3)] will-change-transform">
+              {problem.num2}
+            </div>
+          </>
+        ) : (
+          problem.variant === 'icon-to-word' ? (
+            <div className="text-white drop-shadow-[0_4px_30px_rgba(255,255,255,0.6)] will-change-transform flex items-center justify-center">
+              {problem.centerIcon && <problem.centerIcon className="w-28 h-28 sm:w-48 sm:h-48 md:w-72 md:h-72" strokeWidth={1.5} />}
+            </div>
+          ) : (
+            <div className="text-4xl sm:text-6xl md:text-[100px] leading-none font-black text-white tracking-tighter [text-shadow:0_4px_30px_rgba(255,255,255,0.6)] will-change-transform max-w-[80vw] text-center drop-shadow-xl p-4 break-words">
+              {problem.centerText}
+            </div>
+          )
+        )}
       </div>
     </motion.div>
   );

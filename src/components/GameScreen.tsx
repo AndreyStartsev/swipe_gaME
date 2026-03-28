@@ -1,17 +1,52 @@
-import type { MathProblem } from '../logic/mathGenerator';
+import type { GameProblem } from './SwipeCard';
 import { SwipeCard } from './SwipeCard';
+import type { WordOption } from '../logic/wordGenerator';
 
 interface Props {
   score: number;
   timeLeft: number;
   level: number;
-  problem: MathProblem;
-  onAnswer: (answer: number) => void;
+  problem: GameProblem;
+  onAnswer: (answer: number | string) => void;
 }
 
 export function GameScreen({ score, timeLeft, level, problem, onAnswer }: Props) {
   const timerWarning = timeLeft <= 10;
   const progressPercent = Math.min((timeLeft / 60) * 100, 100);
+
+  const renderOption = (value: number | string | WordOption, colorClass: string) => {
+    if (typeof value === 'object' && value !== null && 'id' in value) {
+      const isLongWord = value.text && value.text.length > 8;
+      const textClass = isLongWord 
+        ? "text-base sm:text-2xl md:text-5xl" 
+        : "text-xl sm:text-3xl md:text-5xl";
+        
+      return (
+        <span className={`relative flex items-center justify-center font-black ${colorClass}`}>
+          {value.icon ? (
+            <value.icon className="w-12 h-12 md:w-16 md:h-16" strokeWidth={2} />
+          ) : (
+            <span 
+              className={`${textClass} max-w-[120px] sm:max-w-[140px] md:max-w-none text-center leading-[1.1] md:leading-tight [hyphens:auto]`}
+              lang="ru"
+            >
+              {value.text?.split(' ').map((word, i, arr) => (
+                <span key={i}>
+                  {word}
+                  {i < arr.length - 1 && <br />}
+                </span>
+              ))}
+            </span>
+          )}
+        </span>
+      );
+    }
+    return (
+      <span className={`relative text-2xl sm:text-4xl md:text-5xl font-black ${colorClass}`}>
+        {value as string | number}
+      </span>
+    );
+  };
 
   return (
     <div className="relative w-full h-[100dvh] bg-transparent flex flex-col overflow-hidden text-white">
@@ -55,9 +90,7 @@ export function GameScreen({ score, timeLeft, level, problem, onAnswer }: Props)
         <div className="absolute top-16 md:top-24 left-1/2 -translate-x-1/2 flex flex-col items-center opacity-90 transition-opacity z-30 pointer-events-none">
           <div className="relative flex items-center justify-center p-4 md:p-6">
             <div className="absolute inset-0 bg-gradient-to-b from-fuchsia-600/60 to-transparent blur-[25px] rounded-full mix-blend-screen" />
-            <span className="relative text-4xl md:text-5xl font-black text-fuchsia-50 drop-shadow-[0_0_20px_rgba(232,121,249,1)]">
-              {problem.options[0]}
-            </span>
+            {renderOption(problem.options[0], "text-fuchsia-50 drop-shadow-[0_0_20px_rgba(232,121,249,1)]")}
           </div>
         </div>
 
@@ -65,9 +98,7 @@ export function GameScreen({ score, timeLeft, level, problem, onAnswer }: Props)
         <div className="absolute bottom-16 md:bottom-24 left-1/2 -translate-x-1/2 flex flex-col items-center opacity-90 transition-opacity z-30 pointer-events-none">
           <div className="relative flex items-center justify-center p-4 md:p-6">
             <div className="absolute inset-0 bg-gradient-to-t from-lime-500/60 to-transparent blur-[25px] rounded-full mix-blend-screen" />
-            <span className="relative text-4xl md:text-5xl font-black text-lime-50 drop-shadow-[0_0_20px_rgba(163,230,53,1)]">
-              {problem.options[1]}
-            </span>
+            {renderOption(problem.options[1], "text-lime-50 drop-shadow-[0_0_20px_rgba(163,230,53,1)]")}
           </div>
         </div>
 
@@ -75,9 +106,7 @@ export function GameScreen({ score, timeLeft, level, problem, onAnswer }: Props)
         <div className="absolute left-2 md:left-12 top-1/2 -translate-y-1/2 flex flex-col items-center opacity-90 transition-opacity z-30 pointer-events-none">
           <div className="relative flex items-center justify-center p-4 md:p-6">
             <div className="absolute inset-0 bg-gradient-to-r from-orange-500/60 to-transparent blur-[25px] rounded-full mix-blend-screen" />
-            <span className="relative text-4xl md:text-5xl font-black text-orange-50 drop-shadow-[0_0_20px_rgba(251,146,60,1)]">
-              {problem.options[2]}
-            </span>
+            {renderOption(problem.options[2], "text-orange-50 drop-shadow-[0_0_20px_rgba(251,146,60,1)]")}
           </div>
         </div>
 
@@ -85,9 +114,7 @@ export function GameScreen({ score, timeLeft, level, problem, onAnswer }: Props)
         <div className="absolute right-2 md:right-12 top-1/2 -translate-y-1/2 flex flex-col items-center opacity-90 transition-opacity z-30 pointer-events-none">
           <div className="relative flex items-center justify-center p-4 md:p-6">
             <div className="absolute inset-0 bg-gradient-to-l from-blue-500/60 to-transparent blur-[25px] rounded-full mix-blend-screen" />
-            <span className="relative text-4xl md:text-5xl font-black text-blue-50 drop-shadow-[0_0_20px_rgba(96,165,250,1)]">
-               {problem.options[3]}
-            </span>
+            {renderOption(problem.options[3], "text-blue-50 drop-shadow-[0_0_20px_rgba(96,165,250,1)]")}
           </div>
         </div>
         

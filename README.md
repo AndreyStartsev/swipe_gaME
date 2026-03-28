@@ -1,73 +1,31 @@
-# React + TypeScript + Vite
+# Math & Words Swipe 🚀
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Интеллектуальная развивающая игра на сообразительность, математику и изучение английских/русских слов с механикой "Тапай и свайпай" (в стиле Tinder).
 
-Currently, two official plugins are available:
+## 🌟 Текущие возможности (Features)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+### 1. Игровые режимы
+- **🧮 Цифры (Математика)**: Адаптивная генерация арифметических примеров (от сложения в пределах 10 до сложного умножения и деления).
+- **🌟 Слова (Изучение)**: Интерактивный словарь на базе 50+ векторных иконок, случайным образом подбирающий 4 варианта ответов.
 
-## React Compiler
+### 2. Умное обучение (Spaced Repetition System - SRS)
+- Игра не просто подкидывает случайные примеры или слова, она **анализирует ошибки**.
+- Каждому уровню и каждому конкретному слову присваивается статистика побед и поражений.
+- Если игрок совершает ошибку, "трудный" пример или слово добавляется в высокоприоритетный пул и выпадает с вероятностью 35%, пока игрок не начнет отвечать без ошибок. Слишком "легкие" слова отбрасываются.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 3. Мотивация и Балансировка
+- **Ежедневная Серия (Daily Streak)**: Игра отслеживает последовательные заходы каждый день. Чем дольше игрок заходит, тем больше базовый множитель очков (до x2.0).
+- **Скрытая Квота Очков (Rubber-banding)**: Продвинутая балансная система, ограничивающая жесткий "гринд". 
+  - Каждый день серии квота возрастает на 140 очков.
+  - Если игрок сильно отстает, скрытый множитель ускоряет его (давая огромные бонусы +50 очков за ход).
+  - Если игрок заработал очки на неделю вперед, система мягко "глушит" заработок до минимума (+1 очко за ход), мотивируя закончить сессию и вернуться завтра.
 
-## Expanding the ESLint configuration
+### 4. Достижения (Achievements)
+За различные рекорды, уровни и комбинации правильных ответов выдаются значки достижений, которые хранятся локально.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## 🛠 Технологии
+- React 18 + TypeScript
+- Vite
+- Tailwind CSS (Кастомные анимации и градиенты)
+- Framer Motion & @use-gesture/react (Плавная физика бросков)
+- Lucide React (Векторный словарь)

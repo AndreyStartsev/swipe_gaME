@@ -10,6 +10,7 @@ function App() {
   const [showAchievements, setShowAchievements] = useState(false);
   const {
     gameState,
+    gameMode,
     score,
     timeLeft,
     level,
@@ -54,7 +55,7 @@ function App() {
             level={level}
             isNewRecord={isNewRecord}
             newAchievements={newAchievements}
-            onRestart={startGame}
+            onRestart={() => startGame(gameMode)}
           />
         )}
           </>

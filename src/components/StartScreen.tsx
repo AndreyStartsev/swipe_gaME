@@ -1,13 +1,14 @@
-import { Play, Trophy } from 'lucide-react';
+import { Trophy } from 'lucide-react';
 import { loadStats } from '../logic/storage';
 
 interface Props {
-  onStart: () => void;
+  onStart: (mode: 'math' | 'words') => void;
   onOpenAchievements: () => void;
 }
 
 export function StartScreen({ onStart, onOpenAchievements }: Props) {
-  const { highScore } = loadStats();
+  const stats = loadStats();
+  const { highScore, currentStreak = 1 } = stats;
 
   return (
     <div className="relative flex flex-col items-center justify-center w-full h-[100dvh] bg-transparent text-white overflow-hidden">
@@ -26,19 +27,39 @@ export function StartScreen({ onStart, onOpenAchievements }: Props) {
         </div>
 
         <div className="flex flex-col items-center gap-6">
-          <button
-            onClick={onStart}
-            className="group relative flex items-center justify-center w-28 h-28 bg-white text-black rounded-full transition-transform active:scale-90 hover:scale-105"
-            style={{ boxShadow: '0 0 50px rgba(255,255,255,0.4)' }}
-          >
-            <Play className="w-12 h-12 ml-2 fill-current" />
-          </button>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => onStart('math')}
+              className="group flex flex-col items-center justify-center w-32 h-32 bg-fuchsia-600 text-white rounded-3xl transition-transform active:scale-90 hover:scale-105 border-2 border-fuchsia-400 shadow-[0_0_30px_rgba(219,39,119,0.6)]"
+            >
+              <span className="text-[40px] mb-2 drop-shadow-md pb-1">🧮</span>
+              <span className="text-xs font-black uppercase tracking-widest">Цифры</span>
+            </button>
+            <button
+              onClick={() => onStart('words')}
+              className="group flex flex-col items-center justify-center w-32 h-32 bg-cyan-600 text-white rounded-3xl transition-transform active:scale-90 hover:scale-105 border-2 border-cyan-400 shadow-[0_0_30px_rgba(8,145,178,0.6)]"
+            >
+              <span className="text-[40px] mb-2 drop-shadow-md pb-1">🌟</span>
+              <span className="text-xs font-black uppercase tracking-widest">Слова</span>
+            </button>
+          </div>
           
           <div className="flex items-center gap-6 mt-8">
             <div className="flex flex-col items-center">
               <span className="text-gray-500 text-xs font-bold uppercase tracking-widest mb-1">Рекорд</span>
               <span className="text-2xl font-black text-white">{highScore}</span>
             </div>
+            
+            {currentStreak > 1 && (
+              <div className="flex flex-col items-center ml-2 border-l border-white/10 pl-6">
+                <span className="text-orange-400 text-xs font-bold uppercase tracking-widest mb-1 flex items-center gap-1">
+                  🔥 Серия
+                </span>
+                <span className="text-lg font-black text-orange-300">
+                  {currentStreak} дней (x{Math.min(1.0 + (currentStreak - 1) * 0.2, 2.0).toFixed(1)})
+                </span>
+              </div>
+            )}
             
             <button
               onClick={onOpenAchievements}

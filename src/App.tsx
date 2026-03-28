@@ -1,0 +1,67 @@
+import { useGameState } from './logic/useGameState';
+import { StartScreen } from './components/StartScreen';
+import { GameScreen } from './components/GameScreen';
+import { GameOverScreen } from './components/GameOverScreen';
+import { Starfield } from './components/Starfield';
+import { AchievementsScreen } from './components/AchievementsScreen';
+import { useState } from 'react';
+
+function App() {
+  const [showAchievements, setShowAchievements] = useState(false);
+  const {
+    gameState,
+    score,
+    timeLeft,
+    level,
+    currentProblem,
+    isNewRecord,
+    newAchievements,
+    startGame,
+    handleAnswer,
+  } = useGameState();
+
+  return (
+    <div className="w-full min-h-[100dvh] bg-[#020202] overflow-hidden select-none relative">
+      
+      {/* Глобальный фон полета через звезды */}
+      <Starfield />
+
+      <div className="absolute inset-0 z-10 w-full h-full">
+        {showAchievements ? (
+          <AchievementsScreen onBack={() => setShowAchievements(false)} />
+        ) : (
+          <>
+            {gameState === 'idle' && (
+              <StartScreen 
+                onStart={startGame} 
+                onOpenAchievements={() => setShowAchievements(true)} 
+              />
+            )}
+        
+        {gameState === 'playing' && currentProblem && (
+          <GameScreen
+            score={score}
+            timeLeft={timeLeft}
+            level={level}
+            problem={currentProblem}
+            onAnswer={handleAnswer}
+          />
+        )}
+        
+        {gameState === 'gameOver' && (
+          <GameOverScreen
+            score={score}
+            level={level}
+            isNewRecord={isNewRecord}
+            newAchievements={newAchievements}
+            onRestart={startGame}
+          />
+        )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default App;

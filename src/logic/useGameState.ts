@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { generateProblem } from './mathGenerator';
 import { generateWordProblem } from './wordGenerator';
+import { generateComicSequence, getStoryById } from './comicsGenerator';
+import type { ComicProblem } from './comicsGenerator';
 import type { GameProblem } from '../components/SwipeCard';
 import { useSound } from './useSound';
 import { loadStats, saveStats, loadProblemStats, saveProblemStats } from './storage';
@@ -13,20 +15,22 @@ const TIME_PENALTY_PER_WRONG = 5;
 
 export function useGameState() {
   const { playCorrect, playWrong, playStart, playGameOver, startBgm, stopBgm, setAnxiety } = useSound();
-  const [gameState, setGameState] = useState<'idle' | 'playing' | 'gameOver'>('idle');
-  const [gameMode, setGameMode] = useState<'math' | 'words'>('math');
+  const [gameState, setGameState] = useState<'idle' | 'playing' | 'gameOver' | 'bonus'>('idle');
+  const [gameMode, setGameMode] = useState<'math' | 'words' | 'comics'>('math');
+  const [comicSequence, setComicSequence] = useState<ComicProblem[]>([]);
   const [score, setScore] = useState(0);
   const [sessionPointsEarned, setSessionPointsEarned] = useState(0);
   const [timeLeft, setTimeLeft] = useState(INITIAL_TIME);
   const [level, setLevel] = useState(1);
   const [currentProblem, setCurrentProblem] = useState<GameProblem | null>(null);
+  const [bonusImage, setBonusImage] = useState<string | null>(null);
 
   const [isNewRecord, setIsNewRecord] = useState(false);
   const [newAchievements, setNewAchievements] = useState<string[]>([]);
   const [sessionCorrect, setSessionCorrect] = useState(0);
   const [sessionWrong, setSessionWrong] = useState(0);
 
-  const startGame = useCallback((mode: 'math' | 'words' = 'math') => {
+  const startGame = useCallback((mode: 'math' | 'words' | 'comics' = 'math') => {
     const globalStats = loadStats();
     let initialLevel = 1;
     
@@ -45,9 +49,17 @@ export function useGameState() {
     setScore((initialLevel - 1) * 100); 
     setTimeLeft(INITIAL_TIME);
     setLevel(initialLevel);
-    setCurrentProblem(mode === 'math' 
-      ? generateProblem(initialLevel, currentProblemStats) 
-      : generateWordProblem(initialLevel, currentProblemStats));
+    
+    if (mode === 'math') {
+      setCurrentProblem(generateProblem(initialLevel, currentProblemStats));
+    } else if (mode === 'words') {
+      setCurrentProblem(generateWordProblem(initialLevel, currentProblemStats));
+    } else {
+      const seq = generateComicSequence(initialLevel, currentProblemStats);
+      setCurrentProblem(seq[0]);
+      setComicSequence(seq.slice(1));
+    }
+    
     startBgm(); 
     setAnxiety(0); 
     setSessionCorrect(0);
@@ -65,7 +77,9 @@ export function useGameState() {
     // Для математики ключ это строка "1 + 2", для слов - просто само правильное слово
     const problemKey = currentProblem.type === 'math' 
       ? `${currentProblem.num1} ${currentProblem.operator} ${currentProblem.num2}`
-      : currentProblem.answer;
+      : currentProblem.type === 'comics' 
+        ? `${currentProblem.storyId}_${currentProblem.currentFrameId}` 
+        : currentProblem.answer;
     
     if (!problemStats[problemKey]) {
       problemStats[problemKey] = { correct: 0, wrong: 0, lastSeen: Date.now() };
@@ -106,9 +120,36 @@ export function useGameState() {
       const newLevel = Math.floor(newScore / 100) + 1;
       setLevel(newLevel);
       
-      setCurrentProblem(gameMode === 'math' 
-        ? generateProblem(newLevel, problemStats)
-        : generateWordProblem(newLevel, problemStats));
+      let nextProblem: GameProblem | null = null;
+      if (gameMode === 'math') {
+        nextProblem = generateProblem(newLevel, problemStats);
+        setCurrentProblem(nextProblem);
+      } else if (gameMode === 'words') {
+        nextProblem = generateWordProblem(newLevel, problemStats);
+        setCurrentProblem(nextProblem);
+      } else if (gameMode === 'comics') {
+        if (comicSequence.length > 0) {
+          nextProblem = comicSequence[0];
+          setComicSequence(seq => seq.slice(1));
+          setCurrentProblem(nextProblem);
+        } else {
+          // Завершен комикс. Проверяем наличие бонуса
+          if (currentProblem && currentProblem.type === 'comics') {
+            const story = getStoryById(currentProblem.storyId);
+            if (story && story.bonusImage) {
+              setBonusImage(story.bonusImage);
+              setGameState('bonus');
+              return true; // Ждем continueFromBonus
+            }
+          }
+          
+          const seq = generateComicSequence(newLevel, problemStats);
+          nextProblem = seq[0];
+          setComicSequence(seq.slice(1));
+          setCurrentProblem(nextProblem);
+        }
+      }
+      
       return true;
     } else {
       problemStats[problemKey].wrong++;
@@ -179,6 +220,15 @@ export function useGameState() {
     }
   }, [gameState, score, level, sessionCorrect, sessionWrong]);
 
+  const continueFromBonus = useCallback(() => {
+    setGameState('playing');
+    setBonusImage(null);
+    const problemStats = loadProblemStats();
+    const seq = generateComicSequence(level, problemStats);
+    setCurrentProblem(seq[0]);
+    setComicSequence(seq.slice(1));
+  }, [level]);
+
   return {
     gameState,
     gameMode,
@@ -186,9 +236,11 @@ export function useGameState() {
     timeLeft,
     level,
     currentProblem,
+    bonusImage,
     isNewRecord,
     newAchievements,
     startGame,
     handleAnswer,
+    continueFromBonus,
   };
 }

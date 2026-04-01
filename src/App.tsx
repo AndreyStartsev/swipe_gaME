@@ -2,6 +2,7 @@ import { useGameState } from './logic/useGameState';
 import { StartScreen } from './components/StartScreen';
 import { GameScreen } from './components/GameScreen';
 import { GameOverScreen } from './components/GameOverScreen';
+import { BonusScreen } from './components/BonusScreen';
 import { Starfield } from './components/Starfield';
 import { AchievementsScreen } from './components/AchievementsScreen';
 import { useState } from 'react';
@@ -15,10 +16,12 @@ function App() {
     timeLeft,
     level,
     currentProblem,
+    bonusImage,
     isNewRecord,
     newAchievements,
     startGame,
     handleAnswer,
+    continueFromBonus,
   } = useGameState();
 
   return (
@@ -49,6 +52,10 @@ function App() {
           />
         )}
         
+        {gameState === 'bonus' && bonusImage && (
+          <BonusScreen imageUrl={bonusImage} onContinue={continueFromBonus} />
+        )}
+
         {gameState === 'gameOver' && (
           <GameOverScreen
             score={score}

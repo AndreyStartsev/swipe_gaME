@@ -2,7 +2,7 @@ import { Trophy } from 'lucide-react';
 import { loadStats } from '../logic/storage';
 
 interface Props {
-  onStart: (mode: 'math' | 'words') => void;
+  onStart: (mode: 'math' | 'words' | 'comics') => void;
   onOpenAchievements: () => void;
 }
 
@@ -27,20 +27,27 @@ export function StartScreen({ onStart, onOpenAchievements }: Props) {
         </div>
 
         <div className="flex flex-col items-center gap-6">
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap justify-center items-center gap-4">
             <button
               onClick={() => onStart('math')}
-              className="group flex flex-col items-center justify-center w-32 h-32 bg-fuchsia-600 text-white rounded-3xl transition-transform active:scale-90 hover:scale-105 border-2 border-fuchsia-400 shadow-[0_0_30px_rgba(219,39,119,0.6)]"
+              className="group flex flex-col items-center justify-center w-28 h-28 sm:w-32 sm:h-32 bg-fuchsia-600 text-white rounded-3xl transition-transform active:scale-90 hover:scale-105 border-2 border-fuchsia-400 shadow-[0_0_30px_rgba(219,39,119,0.6)]"
             >
               <span className="text-[40px] mb-2 drop-shadow-md pb-1">🧮</span>
               <span className="text-xs font-black uppercase tracking-widest">Цифры</span>
             </button>
             <button
               onClick={() => onStart('words')}
-              className="group flex flex-col items-center justify-center w-32 h-32 bg-cyan-600 text-white rounded-3xl transition-transform active:scale-90 hover:scale-105 border-2 border-cyan-400 shadow-[0_0_30px_rgba(8,145,178,0.6)]"
+              className="group flex flex-col items-center justify-center w-28 h-28 sm:w-32 sm:h-32 bg-cyan-600 text-white rounded-3xl transition-transform active:scale-90 hover:scale-105 border-2 border-cyan-400 shadow-[0_0_30px_rgba(8,145,178,0.6)]"
             >
               <span className="text-[40px] mb-2 drop-shadow-md pb-1">🌟</span>
               <span className="text-xs font-black uppercase tracking-widest">Слова</span>
+            </button>
+            <button
+              onClick={() => onStart('comics')}
+              className="group flex flex-col items-center justify-center w-28 h-28 sm:w-32 sm:h-32 bg-amber-500 text-white rounded-3xl transition-transform active:scale-90 hover:scale-105 border-2 border-amber-300 shadow-[0_0_30px_rgba(245,158,11,0.6)]"
+            >
+              <span className="text-[40px] mb-2 drop-shadow-md pb-1">🗯️</span>
+              <span className="text-xs font-black uppercase tracking-widest">Комиксы</span>
             </button>
           </div>
           

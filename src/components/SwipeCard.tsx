@@ -176,8 +176,8 @@ export function SwipeCard({ problem, onAnswer }: Props) {
           </>
         ) : problem.type === 'comics' ? (
           <div className="flex items-center justify-center bg-white text-slate-800 rounded-full w-32 h-32 sm:w-48 sm:h-48 md:w-56 md:h-56 shadow-[0_10px_50px_rgba(255,255,255,0.3)] border-[6px] border-slate-100 p-4 shrink-0">
-            <span className="text-xl sm:text-2xl md:text-3xl font-black text-center leading-tight break-words [hyphens:auto]">
-              {problem.frames.find(f => f.id === problem.currentFrameId)?.text}
+            <span className="text-xl sm:text-2xl md:text-3xl font-black text-center leading-tight break-words [hyphens:auto]" dir="auto">
+              {problem.frames.find(f => f.id === problem.currentFrameId)?.translations[problem.language]}
             </span>
           </div>
         ) : (
@@ -186,7 +186,7 @@ export function SwipeCard({ problem, onAnswer }: Props) {
               {problem.centerIcon && <problem.centerIcon className="w-28 h-28 sm:w-48 sm:h-48 md:w-72 md:h-72" strokeWidth={1.5} />}
             </div>
           ) : (
-            <div className="text-4xl sm:text-6xl md:text-[100px] leading-none font-black text-white tracking-tighter [text-shadow:0_4px_30px_rgba(255,255,255,0.6)] will-change-transform max-w-[80vw] text-center drop-shadow-xl p-4 break-words">
+            <div className="text-4xl sm:text-6xl md:text-[100px] leading-none font-black text-white tracking-tighter [text-shadow:0_4px_30px_rgba(255,255,255,0.6)] will-change-transform max-w-[80vw] text-center drop-shadow-xl p-4 break-words" dir="auto">
               {problem.centerText}
             </div>
           )

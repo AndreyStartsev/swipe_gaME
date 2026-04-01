@@ -19,9 +19,11 @@ function App() {
     bonusImage,
     isNewRecord,
     newAchievements,
+    wordLanguage,
     startGame,
     handleAnswer,
     continueFromBonus,
+    changeLanguage,
   } = useGameState();
 
   return (
@@ -38,7 +40,9 @@ function App() {
             {gameState === 'idle' && (
               <StartScreen 
                 onStart={startGame} 
-                onOpenAchievements={() => setShowAchievements(true)} 
+                onOpenAchievements={() => setShowAchievements(true)}
+                language={wordLanguage}
+                onChangeLanguage={changeLanguage}
               />
             )}
         

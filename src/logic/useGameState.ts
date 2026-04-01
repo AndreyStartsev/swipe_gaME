@@ -8,6 +8,8 @@ import { useSound } from './useSound';
 import { loadStats, saveStats, loadProblemStats, saveProblemStats } from './storage';
 import { checkNewAchievements } from './achievements';
 
+import type { LanguageCode } from './wordGenerator';
+
 const INITIAL_TIME = 60; // 60 seconds
 const SCORE_PER_CORRECT = 10;
 const TIME_BONUS_PER_CORRECT = 5;
@@ -18,6 +20,7 @@ export function useGameState() {
   const [gameState, setGameState] = useState<'idle' | 'playing' | 'gameOver' | 'bonus'>('idle');
   const [gameMode, setGameMode] = useState<'math' | 'words' | 'comics'>('math');
   const [comicSequence, setComicSequence] = useState<ComicProblem[]>([]);
+  const [wordLanguage, setWordLanguage] = useState<LanguageCode>('ru');
   const [score, setScore] = useState(0);
   const [sessionPointsEarned, setSessionPointsEarned] = useState(0);
   const [timeLeft, setTimeLeft] = useState(INITIAL_TIME);
@@ -29,6 +32,20 @@ export function useGameState() {
   const [newAchievements, setNewAchievements] = useState<string[]>([]);
   const [sessionCorrect, setSessionCorrect] = useState(0);
   const [sessionWrong, setSessionWrong] = useState(0);
+
+  useEffect(() => {
+    const stats = loadStats();
+    if (stats.language) {
+      setWordLanguage(stats.language);
+    }
+  }, []);
+
+  const changeLanguage = useCallback((lang: LanguageCode) => {
+    setWordLanguage(lang);
+    const stats = loadStats();
+    stats.language = lang;
+    saveStats(stats);
+  }, []);
 
   const startGame = useCallback((mode: 'math' | 'words' | 'comics' = 'math') => {
     const globalStats = loadStats();
@@ -53,9 +70,9 @@ export function useGameState() {
     if (mode === 'math') {
       setCurrentProblem(generateProblem(initialLevel, currentProblemStats));
     } else if (mode === 'words') {
-      setCurrentProblem(generateWordProblem(initialLevel, currentProblemStats));
+      setCurrentProblem(generateWordProblem(initialLevel, currentProblemStats, wordLanguage));
     } else {
-      const seq = generateComicSequence(initialLevel, currentProblemStats);
+      const seq = generateComicSequence(initialLevel, wordLanguage, currentProblemStats);
       setCurrentProblem(seq[0]);
       setComicSequence(seq.slice(1));
     }
@@ -67,7 +84,7 @@ export function useGameState() {
     setSessionPointsEarned(0);
     setIsNewRecord(false);
     setNewAchievements([]);
-  }, [playStart, startBgm, setAnxiety]);
+  }, [playStart, startBgm, setAnxiety, wordLanguage]);
 
   const handleAnswer = useCallback((answer: number | string) => {
     if (gameState !== 'playing' || !currentProblem) return false;
@@ -125,7 +142,7 @@ export function useGameState() {
         nextProblem = generateProblem(newLevel, problemStats);
         setCurrentProblem(nextProblem);
       } else if (gameMode === 'words') {
-        nextProblem = generateWordProblem(newLevel, problemStats);
+        nextProblem = generateWordProblem(newLevel, problemStats, wordLanguage);
         setCurrentProblem(nextProblem);
       } else if (gameMode === 'comics') {
         if (comicSequence.length > 0) {
@@ -143,7 +160,7 @@ export function useGameState() {
             }
           }
           
-          const seq = generateComicSequence(newLevel, problemStats);
+          const seq = generateComicSequence(newLevel, wordLanguage, problemStats);
           nextProblem = seq[0];
           setComicSequence(seq.slice(1));
           setCurrentProblem(nextProblem);
@@ -160,7 +177,7 @@ export function useGameState() {
       setTimeLeft(t => Math.max(t - TIME_PENALTY_PER_WRONG, 0));
       return false;
     }
-  }, [gameState, currentProblem, score, playCorrect, playWrong]);
+  }, [gameState, currentProblem, score, playCorrect, playWrong, wordLanguage, gameMode, comicSequence]);
 
   // Обновление таймера и фоновой музыки (Anxiety System)
   useEffect(() => {
@@ -224,10 +241,10 @@ export function useGameState() {
     setGameState('playing');
     setBonusImage(null);
     const problemStats = loadProblemStats();
-    const seq = generateComicSequence(level, problemStats);
+    const seq = generateComicSequence(level, wordLanguage, problemStats);
     setCurrentProblem(seq[0]);
     setComicSequence(seq.slice(1));
-  }, [level]);
+  }, [level, wordLanguage]);
 
   return {
     gameState,
@@ -239,8 +256,10 @@ export function useGameState() {
     bonusImage,
     isNewRecord,
     newAchievements,
+    wordLanguage,
     startGame,
     handleAnswer,
     continueFromBonus,
+    changeLanguage,
   };
 }

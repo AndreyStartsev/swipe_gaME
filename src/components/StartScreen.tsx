@@ -1,12 +1,22 @@
 import { Trophy } from 'lucide-react';
 import { loadStats } from '../logic/storage';
+import type { LanguageCode } from '../logic/wordGenerator';
 
 interface Props {
   onStart: (mode: 'math' | 'words' | 'comics') => void;
   onOpenAchievements: () => void;
+  language: LanguageCode;
+  onChangeLanguage: (lang: LanguageCode) => void;
 }
 
-export function StartScreen({ onStart, onOpenAchievements }: Props) {
+const LANGUAGES: { code: LanguageCode; label: string; flag: string }[] = [
+  { code: 'ru', label: 'Русский', flag: '🇷🇺' },
+  { code: 'en', label: 'English', flag: '🇬🇧' },
+  { code: 'fr', label: 'Français', flag: '🇫🇷' },
+  { code: 'he', label: 'עברית', flag: '🇮🇱' }
+];
+
+export function StartScreen({ onStart, onOpenAchievements, language, onChangeLanguage }: Props) {
   const stats = loadStats();
   const { highScore, currentStreak = 1 } = stats;
 
@@ -50,8 +60,31 @@ export function StartScreen({ onStart, onOpenAchievements }: Props) {
               <span className="text-xs font-black uppercase tracking-widest">Комиксы</span>
             </button>
           </div>
+
+          <div className="flex flex-col items-center bg-white/5 rounded-2xl p-3 border border-white/10 mt-2 hover:bg-white/10 transition-colors pointer-events-auto">
+            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-2 border-b border-white/10 pb-1 px-4 text-center">
+              Язык (Слова / Комиксы)
+            </span>
+            <div className="flex gap-2">
+              {LANGUAGES.map(lang => (
+                <button
+                  key={lang.code}
+                  onClick={() => onChangeLanguage(lang.code)}
+                  title={lang.label}
+                  className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all border ${
+                    language === lang.code 
+                      ? 'bg-cyan-600/30 border-cyan-400 text-white shadow-[0_0_15px_rgba(8,145,178,0.5)] scale-105' 
+                      : 'bg-transparent border-white/10 text-gray-500 hover:text-gray-300 hover:border-white/30'
+                  }`}
+                >
+                  <span className="text-xl leading-none">{lang.flag}</span>
+                  <span className="text-[10px] font-black uppercase tracking-wider">{lang.code}</span>
+                </button>
+              ))}
+            </div>
+          </div>
           
-          <div className="flex items-center gap-6 mt-8">
+          <div className="flex items-center gap-6 mt-6">
             <div className="flex flex-col items-center">
               <span className="text-gray-500 text-xs font-bold uppercase tracking-widest mb-1">Рекорд</span>
               <span className="text-2xl font-black text-white">{highScore}</span>

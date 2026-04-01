@@ -8,6 +8,7 @@ export interface GameStats {
   lastLoginDate?: string;
   currentStreak?: number;
   streakScore?: number;
+  language?: 'ru' | 'en' | 'fr' | 'he';
 }
 
 export interface ProblemStats {
@@ -31,6 +32,7 @@ const DEFAULT_STATS: GameStats = {
   lastLoginDate: '',
   currentStreak: 0,
   streakScore: 0,
+  language: 'ru',
 };
 
 export function loadStats(): GameStats {

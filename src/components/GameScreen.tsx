@@ -26,8 +26,11 @@ export function GameScreen({ score, timeLeft, level, problem, onAnswer }: Props)
           </div>
         )}
         {/* Comic Caption Box */}
-        <div className="absolute top-2 sm:top-4 left-2 sm:left-4 right-2 sm:right-4 bg-white text-black font-black px-2 py-1 sm:px-4 sm:py-2 text-sm sm:text-lg md:text-xl leading-tight text-center border-2 border-black shadow-[3px_3px_0_rgba(0,0,0,1)]">
-          {isSolved ? frame.text : "..."}
+        <div 
+          className="absolute top-2 sm:top-4 left-2 sm:left-4 right-2 sm:right-4 bg-white text-black font-black px-2 py-1 sm:px-4 sm:py-2 text-sm sm:text-lg md:text-xl leading-tight text-center border-2 border-black shadow-[3px_3px_0_rgba(0,0,0,1)]"
+          dir="auto"
+        >
+          {isSolved ? frame.translations[(problem as Extract<GameProblem, { type: 'comics' }>).language] : "..."}
         </div>
       </div>
     );
@@ -47,7 +50,7 @@ export function GameScreen({ score, timeLeft, level, problem, onAnswer }: Props)
           ) : (
             <span 
               className={`${textClass} max-w-[120px] sm:max-w-[140px] md:max-w-none text-center leading-[1.1] md:leading-tight [hyphens:auto]`}
-              lang="ru"
+              dir="auto"
             >
               {value.text?.split(' ').map((word, i, arr) => (
                 <span key={i}>

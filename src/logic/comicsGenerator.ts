@@ -172,9 +172,14 @@ export interface ComicProblem {
   language: LanguageCode; // Added so UI knows which text to show
 }
 
-export function generateComicSequence(_level: number, language: LanguageCode = 'ru', _stats?: ProblemStats): ComicProblem[] {
-  const storyIndex = Math.floor(Math.random() * COMIC_LIBRARY.length);
-  const story = COMIC_LIBRARY[storyIndex];
+export function generateComicSequence(_level: number, language: LanguageCode = 'ru', _stats?: ProblemStats, seenStoryIds: string[] = []): ComicProblem[] {
+  let availableStories = COMIC_LIBRARY.filter(s => !seenStoryIds.includes(s.id));
+  if (availableStories.length === 0) {
+    availableStories = COMIC_LIBRARY;
+  }
+
+  const storyIndex = Math.floor(Math.random() * availableStories.length);
+  const story = availableStories[storyIndex];
 
   const options = [...story.frames];
   const askOrder = [...story.frames].sort(() => Math.random() - 0.5);

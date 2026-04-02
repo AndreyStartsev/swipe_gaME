@@ -20,6 +20,7 @@ export function useGameState() {
   const [gameState, setGameState] = useState<'idle' | 'playing' | 'gameOver' | 'bonus'>('idle');
   const [gameMode, setGameMode] = useState<'math' | 'words' | 'comics'>('math');
   const [comicSequence, setComicSequence] = useState<ComicProblem[]>([]);
+  const [seenComicIds, setSeenComicIds] = useState<string[]>([]);
   const [wordLanguage, setWordLanguage] = useState<LanguageCode>('ru');
   const [score, setScore] = useState(0);
   const [sessionPointsEarned, setSessionPointsEarned] = useState(0);
@@ -72,7 +73,8 @@ export function useGameState() {
     } else if (mode === 'words') {
       setCurrentProblem(generateWordProblem(initialLevel, currentProblemStats, wordLanguage));
     } else {
-      const seq = generateComicSequence(initialLevel, wordLanguage, currentProblemStats);
+      const seq = generateComicSequence(initialLevel, wordLanguage, currentProblemStats, []);
+      setSeenComicIds([seq[0].storyId]);
       setCurrentProblem(seq[0]);
       setComicSequence(seq.slice(1));
     }
@@ -160,7 +162,8 @@ export function useGameState() {
             }
           }
           
-          const seq = generateComicSequence(newLevel, wordLanguage, problemStats);
+          const seq = generateComicSequence(newLevel, wordLanguage, problemStats, seenComicIds);
+          setSeenComicIds(prev => [...prev, seq[0].storyId]);
           nextProblem = seq[0];
           setComicSequence(seq.slice(1));
           setCurrentProblem(nextProblem);
@@ -175,9 +178,42 @@ export function useGameState() {
       playWrong();
       setSessionWrong(s => s + 1);
       setTimeLeft(t => Math.max(t - TIME_PENALTY_PER_WRONG, 0));
+
+      if (gameMode === 'comics' && currentProblem && currentProblem.type === 'comics') {
+        const remainingFrameIds = [
+          currentProblem.currentFrameId,
+          ...comicSequence.map(p => p.currentFrameId)
+        ];
+        
+        if (remainingFrameIds.length > 1) {
+          let shuffledIds = [...remainingFrameIds];
+          while (shuffledIds[0] === currentProblem.currentFrameId) {
+            shuffledIds = shuffledIds.sort(() => Math.random() - 0.5);
+          }
+          
+          const nextProblemArray: ComicProblem[] = [];
+          const currentSolved = [...currentProblem.solvedFrames];
+          
+          for (let i = 0; i < shuffledIds.length; i++) {
+            const fId = shuffledIds[i];
+            const solvedSoFar = [...currentSolved, ...shuffledIds.slice(0, i)];
+            
+            nextProblemArray.push({
+              ...currentProblem,
+              solvedFrames: solvedSoFar,
+              currentFrameId: fId,
+              answer: fId,
+            });
+          }
+          
+          setCurrentProblem(nextProblemArray[0]);
+          setComicSequence(nextProblemArray.slice(1));
+        }
+      }
+
       return false;
     }
-  }, [gameState, currentProblem, score, playCorrect, playWrong, wordLanguage, gameMode, comicSequence]);
+  }, [gameState, currentProblem, score, playCorrect, playWrong, wordLanguage, gameMode, comicSequence, seenComicIds]);
 
   // Обновление таймера и фоновой музыки (Anxiety System)
   useEffect(() => {
@@ -241,10 +277,11 @@ export function useGameState() {
     setGameState('playing');
     setBonusImage(null);
     const problemStats = loadProblemStats();
-    const seq = generateComicSequence(level, wordLanguage, problemStats);
+    const seq = generateComicSequence(level, wordLanguage, problemStats, seenComicIds);
+    setSeenComicIds(prev => [...prev, seq[0].storyId]);
     setCurrentProblem(seq[0]);
     setComicSequence(seq.slice(1));
-  }, [level, wordLanguage]);
+  }, [level, wordLanguage, seenComicIds]);
 
   return {
     gameState,
